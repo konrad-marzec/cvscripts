@@ -3,20 +3,15 @@
 Demo of the python rectification implementation
 """
 import epipolar
-import draw
 import camera
 import numpy as np
 import numpy.linalg as la
-import gflags
 import pylab as pl
 import scipy
 import scipy.io
 import scipy.misc
 import cv2
-import cv2.cv as cv
-import matplotlib.cm as cm
 import signal
-import random
 
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
@@ -26,8 +21,8 @@ def load_dinosaur():
     imgidx1 = 0
     imgidx2 = 1
     ## ----- Data loading (Vgg Dinosaur)
-    img1 = cv2.imread("data/dino/viff.%03i.ppm"%imgidx1, cv.IPL_DEPTH_8U)
-    img2 = cv2.imread("data/dino/viff.%03i.ppm"%imgidx2, cv.IPL_DEPTH_8U)
+    img1 = cv2.imread("data/dino/viff.%03i.ppm" % imgidx1, cv2.IPL_DEPTH_8U)
+    img2 = cv2.imread("data/dino/viff.%03i.ppm" % imgidx2, cv2.IPL_DEPTH_8U)
 
     Ps = scipy.io.loadmat("data/dino/dino_Ps.mat")['P']
     # TODO: Looks like loadmat require some byte order conversion...
@@ -53,8 +48,8 @@ def load_dinosaur():
     return img1, img2, x1, x2, K, d
 
 def load_human():
-    img1 = cv2.imread("data/human/image1.png", cv.IPL_DEPTH_8U)
-    img2 = cv2.imread("data/human/image2.png", cv.IPL_DEPTH_8U)
+    img1 = cv2.imread("data/human/image1.png", cv2.IMREAD_GRAYSCALE)
+    img2 = cv2.imread("data/human/image2.png", cv2.IMREAD_GRAYSCALE)
     K = np.load("data/human/K.npy")
     d = np.load("data/human/d.npy")
     x1 = np.load("data/human/x1.npy")
@@ -101,9 +96,9 @@ def rectify_images(img1, x1, img2, x2, K, d, F, shearing=False):
 
     # TODO: lRect or rRect for img1/img2 ??
     map1x, map1y = cv2.initUndistortRectifyMap(K, d, rH, K, imsize,
-                                               cv.CV_16SC2)
+                                               cv2.CV_16SC2)
     map2x, map2y = cv2.initUndistortRectifyMap(K, d, lH, K, imsize,
-                                               cv.CV_16SC2)
+                                               cv2.CV_16SC2)
 
     # Convert the images to RGBA (add an axis with 4 values)
     img1 = np.tile(img1[:,:,np.newaxis], [1,1,4])
@@ -112,11 +107,11 @@ def rectify_images(img1, x1, img2, x2, K, d, F, shearing=False):
     img2[:,:,3] = 255
 
     rimg1 = cv2.remap(img1, map1x, map1y,
-                      interpolation=cv.CV_INTER_LINEAR,
+                      interpolation=cv2.INTER_LINEAR,
                       borderMode=cv2.BORDER_CONSTANT,
                       borderValue=(0,0,0,0))
     rimg2 = cv2.remap(img2, map2x, map2y,
-                      interpolation=cv.CV_INTER_LINEAR,
+                      interpolation=cv2.INTER_LINEAR,
                       borderMode=cv2.BORDER_CONSTANT,
                       borderValue=(0,0,0,0))
 

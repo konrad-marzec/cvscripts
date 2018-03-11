@@ -1,6 +1,6 @@
 # Copyright (2012) Julien Rebetez <julien@fhtagn.net>
+
 import cv2
-import cv2.cv as cv
 import numpy as np
 import numpy.linalg as la
 import pylab as pl
@@ -13,20 +13,31 @@ def show_rectified_images(rimg1, rimg2):
 
     # Hack to get the lines span on the left image
     # http://stackoverflow.com/questions/6146290/plotting-a-line-over-several-graphs
-    for i in xrange(1, rimg1.shape[0], rimg1.shape[0]/20):
-        pl.axhline(y=i, color='g', xmin=0, xmax=1.2, clip_on=False);
+    i = 1
+    while i < rimg1.shape[0]:
+        pl.axhline(y=i, color='g', xmin=0, xmax=1.2, clip_on=False)
+        i += rimg1.shape[0] / 20
+
+    # for i in range(1, rimg1.shape[0]):#, rimg1.shape[0] / 20):
+    #     pl.axhline(y=i, color='g', xmin=0, xmax=1.2, clip_on=False)
 
     pl.subplot(122)
     pl.imshow(rimg2, cmap=cm.gray)
-    for i in xrange(1, rimg1.shape[0], rimg1.shape[0]/20):
-        pl.axhline(y=i, color='g');
+
+    i = 1
+    while i < rimg1.shape[0]:
+        pl.axhline(y=i, color='g')
+        i += rimg1.shape[0] / 20
+
+    # for i in range(1, rimg1.shape[0]):#, rimg1.shape[0] / 20):
+    #     pl.axhline(y=i, color='g')
 
 
 def epipolar_lines(x1, F12):
     """
     Compute epipolar lines on second image corresponding to a list of
     points on first image
-    As in cv.ComputecorrespondEpilines, line coefficient are normalized
+    As in cv2.ComputecorrespondEpilines, line coefficient are normalized
     so that a^2 + b^2 = 1
     """
     def norm_line(l):
@@ -97,7 +108,7 @@ def rectify_uncalibrated(x1, x2, F, imsize, threshold=5):
                          x2[1,i]*lines1[1,i] +
                          lines1[2,i]) <= threshold)
 
-        inliers = filter(epi_threshold, range(x1.shape[1]))
+        inliers = list(filter(epi_threshold, range(x1.shape[1])))
     else:
         inliers = range(x1.shape[1])
 
@@ -121,11 +132,11 @@ def rectify_uncalibrated(x1, x2, F, imsize, threshold=5):
 
     # Translation bringing the image center to the origin
     # FIXME: This is kind of stupid, but to get the same results as OpenCV,
-    # use cv.Round function, which has a strange behaviour :
-    # cv.Round(99.5) => 100
-    # cv.Round(132.5) => 132
-    cx = cv.Round((imsize[0]-1)*0.5)
-    cy = cv.Round((imsize[1]-1)*0.5)
+    # use cv2.Round function, which has a strange behaviour :
+    # cv2.Round(99.5) => 100
+    # cv2.Round(132.5) => 132
+    cx = round((imsize[0] - 1) * 0.5)
+    cy = round((imsize[1] - 1) * 0.5)
 
     T = np.array([[1, 0, -cx],
                   [0, 1, -cy],
